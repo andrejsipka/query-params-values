@@ -1,6 +1,32 @@
 <router-outlet>
   <div>
-    Some Content
+    header
+
+    <form [formGroup]="form">
+      <label for="calendar">Date</label>
+      <input
+        formControlName="date"
+        type="date"
+        id="calendar"
+        name="trip-start"
+      />
+
+      <label for="time">Time</label>
+      <input
+        formControlName="time"
+        type="time"
+        id="time"
+        name="time"
+        required
+      />
+    </form>
+
+    {{form.status}}
   </div>
+
+  <div>
+    chart
+  </div>
+
 </router-outlet>
 
