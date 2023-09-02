@@ -106,7 +106,13 @@ export class DataAccess {
 
     // Loop over n times and get random country
     for(let i = 0; i < number; i++) {
-      results.push(this.getRandomObj(data));
+      const country = this.getRandomObj(data);
+
+      if(results.find((obj) => obj.name === country.name)) {
+        i = i - 1;
+      } else {
+        results.push(country);
+      }
     }
 
     return results;
@@ -114,7 +120,7 @@ export class DataAccess {
 
   public request(number: number): Observable<Country[]> {
     return of(this.data).pipe(
-      map((data) => this.randomContries(data, 7))
+      map((data) => this.randomContries(data, number))
     );
   }
 }

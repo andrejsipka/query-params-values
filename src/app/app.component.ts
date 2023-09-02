@@ -34,12 +34,28 @@ export class AppComponent implements OnInit {
 
   public options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-  public contries: Country[] = [];
+  public countries: Country[] = [];
   public form: FormGroup = this.fb.group({
     time: [this.setTime()],
     date: [this.setDate()],
     option: [this.options[0]]
   });
+
+  public view: number[] = [700, 400];
+
+  // options
+  public showXAxis = true;
+  public showYAxis = true;
+  public gradient = false;
+  public showLegend = true;
+  public showXAxisLabel = true;
+  public xAxisLabel = 'Country';
+  public showYAxisLabel = true;
+  public yAxisLabel = 'GDP';
+
+  public colorScheme: any = {
+    domain: ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA']
+  };
 
   public ngOnInit(): void {
     this.router.events.pipe(
@@ -50,7 +66,12 @@ export class AppComponent implements OnInit {
     ).subscribe({
       next: (params: Params) => {
         this.validateParams(params);
-        this.getCountries();
+
+        if(this.form.get('option')?.value <= 10) {
+          this.getCountries();
+        } else {
+          alert('"option" number must be 10 or less!');
+        }
       }
     })
   }
@@ -58,8 +79,8 @@ export class AppComponent implements OnInit {
   private getCountries(): void {
     this.countries$.subscribe({
       next: (data) => {
-        this.contries = data;
-        console.log(this.contries);
+        this.countries = data;
+        console.log(this.countries);
       },
       error: (err: Error) => {
         console.log(err.message);
@@ -96,5 +117,9 @@ export class AppComponent implements OnInit {
         option: params['option']
       })
     }
+  }
+
+  public onSelect(e: any): void {
+    console.log(e);
   }
 }
