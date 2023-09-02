@@ -1,8 +1,12 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
-import { NgForm, FormBuilder, FormGroup, NonNullableFormBuilder } from '@angular/forms';
-import { filter, switchMap, interval, Observable } from 'rxjs';
+import { ActivatedRoute, NavigationEnd, Params, Router } from '@angular/router';
+import { FormGroup, NonNullableFormBuilder } from '@angular/forms';
+import { filter, switchMap, interval, timer, Observable, tap, take, timeInterval, mergeMap, startWith } from 'rxjs';
 import { DataAccess } from './data-access.service';
+
+enum FormKeys {
+  OPTION = 'option'
+}
 
 type Country = {
   name: string,
@@ -22,25 +26,30 @@ export class AppComponent implements OnInit {
   private dataAccess = inject(DataAccess);
   private fb = inject(NonNullableFormBuilder);
 
-  private interval$: Observable<number> = interval(10 * 1000);
-  private countries$: Observable<Country[]> = this.dataAccess.request();
+  private interval$: Observable<number> = timer(500, 10 * 1000);
+  private countries$: Observable<Country[]> = this.interval$.pipe(
+    timeInterval(),
+    mergeMap(() => this.dataAccess.request(this.form.get(FormKeys.OPTION)?.value))
+  )
+
+  public options = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
   public contries: Country[] = [];
   public form: FormGroup = this.fb.group({
     time: [this.setTime()],
-    date: [this.setDate()]
+    date: [this.setDate()],
+    option: [this.options[0]]
   });
 
   public ngOnInit(): void {
-    console.log(this.form.get('date')?.value);
-    console.log(this.form.get('time')?.value);
-
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
-      switchMap(() => this.route.queryParams)
+      switchMap(() => this.route.queryParams.pipe(
+        take(1)
+      ))
     ).subscribe({
-      next: (params) => {
-        console.log(params);
+      next: (params: Params) => {
+        this.validateParams(params);
         this.getCountries();
       }
     })
@@ -49,7 +58,8 @@ export class AppComponent implements OnInit {
   private getCountries(): void {
     this.countries$.subscribe({
       next: (data) => {
-        console.log(data);
+        this.contries = data;
+        console.log(this.contries);
       },
       error: (err: Error) => {
         console.log(err.message);
@@ -69,4 +79,22 @@ export class AppComponent implements OnInit {
 
     return [year, month, day].join('-');
   };
+
+  public onSelectChange(e: Event): void {
+    const selected = (e.target as HTMLSelectElement).value;
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { option: selected },
+      queryParamsHandling: 'merge'
+    })
+  }
+
+  public validateParams(params: Params): void {
+    if(params.hasOwnProperty('option')) {
+      this.form.patchValue({
+        option: params['option']
+      })
+    }
+  }
 }

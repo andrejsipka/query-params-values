@@ -112,7 +112,7 @@ export class DataAccess {
     return results;
   }
 
-  public request(): Observable<Country[]> {
+  public request(number: number): Observable<Country[]> {
     return of(this.data).pipe(
       map((data) => this.randomContries(data, 7))
     );

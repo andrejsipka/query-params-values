@@ -26,6 +26,16 @@
 
   <div>
     chart
+    <div>
+      <form [formGroup]="form">
+        <label for="Number of countries"></label>
+        <select formControlName="option" (change)="onSelectChange($event)">
+          <ng-container *ngFor="let option of options">
+            <option [value]="option">{{option}}</option>
+          </ng-container>
+        </select>
+      </form>
+    </div>
   </div>
 
 </router-outlet>
